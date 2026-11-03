@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // --- ЛАБОРАТОРНАЯ №6: Калькулятор ---
     let a = document.querySelectorAll('input[name="productType"]');
     let b = document.getElementById("options-container");
     let c = document.getElementById("product-select");
@@ -55,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         calc();
     }
 
-    // Слайдер
+    // --- ЛАБОРАТОРНАЯ №7: Плавная галерея-слайдер ---
     let imgs = [
         "images/photo1.jpg",
         "images/photo2.jpg",
@@ -79,9 +80,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let curP = document.getElementById("current-page");
     let totP = document.getElementById("total-pages");
 
-    function draw() {
+    function draw(animate = true) {
         if (!sBox) return;
-        sBox.innerHTML = "";
+        
         let vis = getCount();
         let maxP = Math.ceil(imgs.length / vis);
 
@@ -91,19 +92,34 @@ document.addEventListener("DOMContentLoaded", function () {
         let st = idx * vis;
         let en = Math.min(st + vis, imgs.length);
 
-        for (let i = st; i < en; i++) {
-            let el = document.createElement("img");
-            el.src = imgs[i];
-            el.alt = `Фото ${i + 1}`;
-            el.className = "img-fluid rounded border";
-            el.style.width = vis === 1 ? "100%" : "30%";
-            el.style.height = "150px";
-            el.style.objectFit = "cover";
-            sBox.appendChild(el);
+        // Функция отрисовки самих картинок
+        function renderContent() {
+            sBox.innerHTML = "";
+            for (let i = st; i < en; i++) {
+                let el = document.createElement("img");
+                el.src = imgs[i];
+                el.alt = `Фото ${i + 1}`;
+                el.className = "img-fluid rounded border";
+                el.style.width = vis === 1 ? "100%" : "30%";
+                el.style.height = "150px";
+                el.style.objectFit = "cover";
+                sBox.appendChild(el);
+            }
+            if (curP) curP.textContent = idx + 1;
+            if (totP) totP.textContent = maxP;
         }
 
-        if (curP) curP.textContent = idx + 1;
-        if (totP) totP.textContent = maxP;
+        // Плавный эффект затухания (fade)
+        if (animate) {
+            sBox.style.transition = "opacity 0.3s ease-in-out";
+            sBox.style.opacity = "0";
+            setTimeout(() => {
+                renderContent();
+                sBox.style.opacity = "1";
+            }, 300);
+        } else {
+            renderContent();
+        }
     }
 
     if (pBtn && nBtn) {
@@ -111,17 +127,17 @@ document.addEventListener("DOMContentLoaded", function () {
             let vis = getCount();
             let maxP = Math.ceil(imgs.length / vis);
             idx = (idx - 1 + maxP) % maxP;
-            draw();
+            draw(true);
         });
 
         nBtn.addEventListener("click", function () {
             let vis = getCount();
             let maxP = Math.ceil(imgs.length / vis);
             idx = (idx + 1) % maxP;
-            draw();
+            draw(true);
         });
     }
 
-    window.addEventListener("resize", draw);
-    draw();
+    window.addEventListener("resize", () => draw(false));
+    draw(false);
 });
