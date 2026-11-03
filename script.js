@@ -1,5 +1,64 @@
-// --- ЛАБОРАТОРНАЯ РАБОТА №7: Галерея-слайдер ---
+// --- ЛАБОРАТОРНАЯ РАБОТА №6: Калькулятор стоимости ---
 document.addEventListener("DOMContentLoaded", function () {
+    const typeRadios = document.querySelectorAll('input[name="productType"]');
+    const optionsContainer = document.getElementById("options-container");
+    const productSelect = document.getElementById("product-select");
+    const propertyContainer = document.getElementById("property-container");
+    const productProperty = document.getElementById("product-property");
+    const productQuantity = document.getElementById("product-quantity");
+    const calcResult = document.getElementById("calc-result");
+    const calcError = document.getElementById("calc-error");
+
+    function calculateTotal() {
+        let selectedType = document.querySelector('input[name="productType"]:checked');
+        if (!selectedType) return;
+
+        let basePrice = parseFloat(selectedType.value);
+        let optionsPrice = 0;
+        let propertyPrice = 0;
+
+        // Показываем/скрываем опции или свойства в зависимости от типа
+        if (selectedType.id === "type2") {
+            optionsContainer.classList.remove("d-none");
+            propertyContainer.classList.add("d-none");
+            optionsPrice = parseFloat(productSelect.value);
+        } else if (selectedType.id === "type3") {
+            optionsContainer.classList.add("d-none");
+            propertyContainer.classList.remove("d-none");
+            if (productProperty.checked) {
+                propertyPrice = parseFloat(productProperty.value);
+            }
+        } else {
+            optionsContainer.classList.add("d-none");
+            propertyContainer.classList.add("d-none");
+        }
+
+        // Проверка количества (только целые положительные числа)
+        let qtyVal = productQuantity.value.trim();
+        let quantity = parseInt(qtyVal, 10);
+
+        if (qtyVal === "" || isNaN(quantity) || quantity <= 0 || !/^\d+$/.test(qtyVal)) {
+            calcError.style.display = "block";
+            calcError.textContent = "Пожалуйста, введите корректное целое положительное число.";
+            calcResult.textContent = "Стоимость заказа: —";
+            return;
+        } else {
+            calcError.style.display = "none";
+        }
+
+        let total = (basePrice + optionsPrice + propertyPrice) * quantity;
+        calcResult.textContent = `Стоимость заказа: ${total} руб.`;
+    }
+
+    if (typeRadios.length > 0) {
+        typeRadios.forEach(radio => radio.addEventListener("change", calculateTotal));
+        if (productSelect) productSelect.addEventListener("change", calculateTotal);
+        if (productProperty) productProperty.addEventListener("change", calculateTotal);
+        if (productQuantity) productQuantity.addEventListener("input", calculateTotal);
+        calculateTotal();
+    }
+
+    // --- ЛАБОРАТОРНАЯ РАБОТА №7: Галерея-слайдер ---
     const images = [
         "images/photo1.jpg",
         "images/photo2.jpg",
@@ -9,11 +68,10 @@ document.addEventListener("DOMContentLoaded", function () {
         "images/photo6.jpg",
         "images/photo7.jpg",
         "images/photo8.jpg"
-    ]; // Замените пути на ваши реальные 8 картинок (или плейсхолдеры)
+    ];
 
     let currentIndex = 0;
 
-    // Определяем сколько картинок показывать в зависимости от ширины экрана (ПК: 3, Смартфон: 1)
     function getVisibleCount() {
         return window.innerWidth < 768 ? 1 : 3;
     }
@@ -31,14 +89,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const visibleCount = getVisibleCount();
         const totalPages = Math.ceil(images.length / visibleCount);
 
-        if (currentIndex >= totalPages) {
-            currentIndex = totalPages - 1;
-        }
-        if (currentIndex < 0) {
-            currentIndex = 0;
-        }
+        if (currentIndex >= totalPages) currentIndex = totalPages - 1;
+        if (currentIndex < 0) currentIndex = 0;
 
-        // Отрисовка видимых картинок текущей страницы
         const start = currentIndex * visibleCount;
         const end = Math.min(start + visibleCount, images.length);
 
@@ -53,9 +106,8 @@ document.addEventListener("DOMContentLoaded", function () {
             sliderContainer.appendChild(imgElement);
         }
 
-        // Обновление пейджера
-        currentPageSpan.textContent = currentIndex + 1;
-        totalPagesSpan.textContent = totalPages;
+        if (currentPageSpan) currentPageSpan.textContent = currentIndex + 1;
+        if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
     }
 
     if (prevBtn && nextBtn) {
