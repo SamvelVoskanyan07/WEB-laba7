@@ -80,16 +80,21 @@ document.addEventListener("DOMContentLoaded", function () {
     const curPageSpan = document.getElementById("current-page");
     const totPageSpan = document.getElementById("total-pages");
 
-    if (sliderBox && sliderBox.parentElement) {
-        // Настройка окна видимости
-        sliderBox.parentElement.style.overflow = "hidden";
-        sliderBox.parentElement.style.position = "relative";
-        
+    if (sliderBox) {
+        // Очищаем лишние Bootstrap классы, мешающие карусели в HTML
+        sliderBox.className = ""; 
         sliderBox.style.display = "flex";
-        sliderBox.style.transition = "transform 0.4s ease-in-out";
+        sliderBox.style.overflow = "hidden";
+        sliderBox.style.width = "100%";
+        sliderBox.style.position = "relative";
 
-        // Генерируем картинки один раз
-        sliderBox.innerHTML = "";
+        // Создаем внутреннюю ленту для картинок, чтобы они не падали
+        let track = document.createElement("div");
+        track.id = "slider-track";
+        track.style.display = "flex";
+        track.style.transition = "transform 0.4s ease-in-out";
+        track.style.width = "100%";
+
         images.forEach((src, index) => {
             let img = document.createElement("img");
             img.src = src;
@@ -98,14 +103,18 @@ document.addEventListener("DOMContentLoaded", function () {
             img.style.height = "160px";
             img.style.objectFit = "cover";
             img.style.flexShrink = "0";
-            img.style.padding = "0 5px";
+            img.style.padding = "0 6px";
             img.style.boxSizing = "border-box";
-            sliderBox.appendChild(img);
+            track.appendChild(img);
         });
+
+        sliderBox.innerHTML = "";
+        sliderBox.appendChild(track);
     }
 
     function updateSlider() {
-        if (!sliderBox) return;
+        let track = document.getElementById("slider-track");
+        if (!track) return;
 
         let visible = getVisibleCount();
         let totalPages = Math.ceil(images.length / visible);
@@ -113,19 +122,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentIndex >= totalPages) currentIndex = totalPages - 1;
         if (currentIndex < 0) currentIndex = 0;
 
-        // Ширина ленты зависит от количества страниц, а каждой картинки — от видимой области
-        sliderBox.style.width = `${(images.length / visible) * 100}%`;
+        let imgElements = track.children;
+        let itemWidthPercent = 100 / visible;
 
-        let imgElements = sliderBox.children;
-        let itemWidthPercent = 100 / images.length;
-
+        // Каждое изображение занимает строго свою долю видимой зоны (33.33% на ПК)
         for (let i = 0; i < imgElements.length; i++) {
             imgElements[i].style.width = `${itemWidthPercent}%`;
+            imgElements[i].style.flex = `0 0 ${itemWidthPercent}%`;
         }
 
-        // Плавный сдвиг на одну страницу
-        let shiftPercent = currentIndex * (100 / totalPages);
-        sliderBox.style.transform = `translateX(-${shiftPercent}%)`;
+        // Плавный сдвиг всей ленты на текущую страницу
+        let shiftPercent = currentIndex * 100;
+        track.style.transform = `translateX(-${shiftPercent}%)`;
 
         if (curPageSpan) curPageSpan.textContent = currentIndex + 1;
         if (totPageSpan) totPageSpan.textContent = totalPages;
