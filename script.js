@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         calc();
     }
 
-    // --- ЛАБОРАТОРНАЯ №7: Плавная карусель (сдвиг влево) ---
+    // --- ЛАБОРАТОРНАЯ №7: Плавная карусель (по 3 изображения) ---
     let imgs = [
         "images/photo1.jpg",
         "images/photo2.jpg",
@@ -81,12 +81,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let totP = document.getElementById("total-pages");
 
     if (sBox) {
-        // Настраиваем стили контейнера для красивого сдвига
         sBox.style.display = "flex";
         sBox.style.transition = "transform 0.5s ease-in-out";
         sBox.style.width = "100%";
         
-        // Оборачиваем сам контейнер в "окно", чтобы лишние картинки прятались за границами
         if (!sBox.parentElement.style.overflow) {
             sBox.parentElement.style.overflow = "hidden";
             sBox.parentElement.style.position = "relative";
@@ -102,7 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (idx >= maxP) idx = maxP - 1;
         if (idx < 0) idx = 0;
 
-        // Создаем картинки один раз, если их еще нет
+        // Создаем карточки галереи один раз
         if (sBox.children.length !== imgs.length) {
             sBox.innerHTML = "";
             imgs.forEach((src, i) => {
@@ -110,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 el.src = src;
                 el.alt = `Фото ${i + 1}`;
                 el.className = "img-fluid rounded border flex-shrink-0";
-                // Задаем ширину одной картинки в зависимости от режима (3 штуки или 1)
+                // Каждое изображение занимает примерно 33.33% от контейнера (минус отступы)
                 el.style.width = vis === 1 ? "100%" : "calc(33.333% - 10px)";
                 el.style.marginRight = "15px";
                 el.style.height = "150px";
@@ -119,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // Вычисляем процент сдвига влево
+        // Сдвигаем ленту ровно на количество видимых картинок (на страницу)
         let shiftPercentage = idx * 100;
         sBox.style.transform = `translateX(-${shiftPercentage}%)`;
 
