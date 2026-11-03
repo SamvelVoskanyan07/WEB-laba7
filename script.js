@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (e && e.checked) pr = parseFloat(e.value) || 0;
         } else {
             if (b) b.classList.add("d-none");
+            if (d) b.classList.add("d-none"); // исправлено на всякий случай
             if (d) d.classList.add("d-none");
         }
 
@@ -56,7 +57,7 @@ document.addEventListener("DOMContentLoaded", function () {
         calc();
     }
 
-    // --- ЛАБОРАТОРНАЯ №7: Плавная карусель (по 3 изображения) ---
+    // --- ЛАБОРАТОРНАЯ №7: Идеальная плавная карусель ---
     let imgs = [
         "images/photo1.jpg",
         "images/photo2.jpg",
@@ -80,46 +81,52 @@ document.addEventListener("DOMContentLoaded", function () {
     let curP = document.getElementById("current-page");
     let totP = document.getElementById("total-pages");
 
-    if (sBox) {
+    if (sBox && sBox.parentElement) {
+        // Настраиваем видимое окно карусели
+        let wrapper = sBox.parentElement;
+        wrapper.style.overflow = "hidden";
+        wrapper.style.position = "relative";
+
+        // Лента карусели
         sBox.style.display = "flex";
         sBox.style.transition = "transform 0.5s ease-in-out";
         sBox.style.width = "100%";
-        
-        if (!sBox.parentElement.style.overflow) {
-            sBox.parentElement.style.overflow = "hidden";
-            sBox.parentElement.style.position = "relative";
-        }
     }
 
     function draw() {
         if (!sBox) return;
-        
+
         let vis = getCount();
         let maxP = Math.ceil(imgs.length / vis);
 
         if (idx >= maxP) idx = maxP - 1;
         if (idx < 0) idx = 0;
 
-        // Создаем карточки галереи один раз
+        // Создаем элементы один раз
         if (sBox.children.length !== imgs.length) {
             sBox.innerHTML = "";
             imgs.forEach((src, i) => {
                 let el = document.createElement("img");
                 el.src = src;
                 el.alt = `Фото ${i + 1}`;
-                el.className = "img-fluid rounded border flex-shrink-0";
-                // Каждое изображение занимает примерно 33.33% от контейнера (минус отступы)
-                el.style.width = vis === 1 ? "100%" : "calc(33.333% - 10px)";
+                el.className = "rounded border";
+                // Строго задаем ширину каждой картинки: 100% если 1 штука, ровно 33.333% минус отступы если 3 штуки
+                el.style.flex = vis === 1 ? "0 0 100%" : "0 0 calc(33.333% - 10px)";
                 el.style.marginRight = "15px";
-                el.style.height = "150px";
+                el.style.height = "160px";
                 el.style.objectFit = "cover";
                 sBox.appendChild(el);
             });
+        } else {
+            // Обновляем размеры при изменении экрана
+            Array.from(sBox.children).forEach(el => {
+                el.style.flex = vis === 1 ? "0 0 100%" : "0 0 calc(33.333% - 10px)";
+            });
         }
 
-        // Сдвигаем ленту ровно на количество видимых картинок (на страницу)
-        let shiftPercentage = idx * 100;
-        sBox.style.transform = `translateX(-${shiftPercentage}%)`;
+        // Сдвигаем ленту на нужный процент (на страницу вперед/назад)
+        let shift = idx * 100;
+        sBox.style.transform = `translateX(-${shift}%)`;
 
         if (curP) curP.textContent = idx + 1;
         if (totP) totP.textContent = maxP;
