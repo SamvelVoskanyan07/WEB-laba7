@@ -1,64 +1,63 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // --- ЛАБОРАТОРНАЯ №6: Калькулятор ---
-    let a = document.querySelectorAll('input[name="productType"]');
-    let b = document.getElementById("options-container");
-    let c = document.getElementById("product-select");
-    let d = document.getElementById("property-container");
-    let e = document.getElementById("product-property");
-    let f = document.getElementById("product-quantity");
-    let g = document.getElementById("calc-result");
-    let h = document.getElementById("calc-error");
+    // --- КАЛЬКУЛЯТОР (Лабораторная №6) ---
+    let typeRadios = document.querySelectorAll('input[name="productType"]');
+    let optionsContainer = document.getElementById("options-container");
+    let productSelect = document.getElementById("product-select");
+    let propertyContainer = document.getElementById("property-container");
+    let productProperty = document.getElementById("product-property");
+    let productQuantity = document.getElementById("product-quantity");
+    let calcResult = document.getElementById("calc-result");
+    let calcError = document.getElementById("calc-error");
 
-    function calc() {
-        let sel = document.querySelector('input[name="productType"]:checked');
-        if (!sel) return;
+    function calculate() {
+        let selected = document.querySelector('input[name="productType"]:checked');
+        if (!selected) return;
 
-        let p = parseFloat(sel.value);
-        let o = 0;
-        let pr = 0;
+        let base = parseFloat(selected.value) || 0;
+        let opt = 0;
+        let prop = 0;
 
-        if (sel.id === "type2") {
-            if (b) b.classList.remove("d-none");
-            if (d) d.classList.add("d-none");
-            if (c) o = parseFloat(c.value) || 0;
-        } else if (sel.id === "type3") {
-            if (b) b.classList.add("d-none");
-            if (d) d.classList.remove("d-none");
-            if (e && e.checked) pr = parseFloat(e.value) || 0;
+        if (selected.id === "type2") {
+            if (optionsContainer) optionsContainer.classList.remove("d-none");
+            if (propertyContainer) propertyContainer.classList.add("d-none");
+            if (productSelect) opt = parseFloat(productSelect.value) || 0;
+        } else if (selected.id === "type3") {
+            if (optionsContainer) optionsContainer.classList.add("d-none");
+            if (propertyContainer) propertyContainer.classList.remove("d-none");
+            if (productProperty && productProperty.checked) prop = parseFloat(productProperty.value) || 0;
         } else {
-            if (b) b.classList.add("d-none");
-            if (d) b.classList.add("d-none"); // исправлено на всякий случай
-            if (d) d.classList.add("d-none");
+            if (optionsContainer) optionsContainer.classList.add("d-none");
+            if (propertyContainer) propertyContainer.classList.add("d-none");
         }
 
-        let qv = f ? f.value.trim() : "1";
-        let q = parseInt(qv, 10);
+        let qVal = productQuantity ? productQuantity.value.trim() : "1";
+        let qty = parseInt(qVal, 10);
 
-        if (qv === "" || isNaN(q) || q <= 0 || !/^\d+$/.test(qv)) {
-            if (h) {
-                h.style.display = "block";
-                h.textContent = "Введите число";
+        if (qVal === "" || isNaN(qty) || qty <= 0 || !/^\d+$/.test(qVal)) {
+            if (calcError) {
+                calcError.style.display = "block";
+                calcError.textContent = "Введите корректное число";
             }
-            if (g) g.textContent = "Стоимость заказа: —";
+            if (calcResult) calcResult.textContent = "Стоимость заказа: —";
             return;
         } else {
-            if (h) h.style.display = "none";
+            if (calcError) calcError.style.display = "none";
         }
 
-        let res = (p + o + pr) * q;
-        if (g) g.textContent = `Стоимость заказа: ${res} руб.`;
+        let total = (base + opt + prop) * qty;
+        if (calcResult) calcResult.textContent = `Стоимость заказа: ${total} руб.`;
     }
 
-    if (a.length > 0) {
-        a.forEach(r => r.addEventListener("change", calc));
-        if (c) c.addEventListener("change", calc);
-        if (e) e.addEventListener("change", calc);
-        if (f) f.addEventListener("input", calc);
-        calc();
+    if (typeRadios.length > 0) {
+        typeRadios.forEach(r => r.addEventListener("change", calculate));
+        if (productSelect) productSelect.addEventListener("change", calculate);
+        if (productProperty) productProperty.addEventListener("change", calculate);
+        if (productQuantity) productQuantity.addEventListener("input", calculate);
+        calculate();
     }
 
-    // --- ЛАБОРАТОРНАЯ №7: Идеальная плавная карусель ---
-    let imgs = [
+    // --- ПЛАВНАЯ КАРУСЕЛЬ (Лабораторная №7) ---
+    const images = [
         "images/photo1.jpg",
         "images/photo2.jpg",
         "images/photo3.jpg",
@@ -69,85 +68,85 @@ document.addEventListener("DOMContentLoaded", function () {
         "images/photo8.jpg"
     ];
 
-    let idx = 0;
+    let currentIndex = 0;
 
-    function getCount() {
+    function getVisibleCount() {
         return window.innerWidth < 768 ? 1 : 3;
     }
 
-    let sBox = document.getElementById("slider-container");
-    let pBtn = document.getElementById("prev-btn");
-    let nBtn = document.getElementById("next-btn");
-    let curP = document.getElementById("current-page");
-    let totP = document.getElementById("total-pages");
+    const sliderBox = document.getElementById("slider-container");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const curPageSpan = document.getElementById("current-page");
+    const totPageSpan = document.getElementById("total-pages");
 
-    if (sBox && sBox.parentElement) {
-        // Настраиваем видимое окно карусели
-        let wrapper = sBox.parentElement;
-        wrapper.style.overflow = "hidden";
-        wrapper.style.position = "relative";
+    if (sliderBox && sliderBox.parentElement) {
+        // Жестко задаем стили для безупречной работы карусели
+        sliderBox.parentElement.style.overflow = "hidden";
+        sliderBox.parentElement.style.position = "relative";
+        
+        sliderBox.style.display = "flex";
+        sliderBox.style.transition = "transform 0.4s ease-in-out";
+        sliderBox.style.width = "100%";
 
-        // Лента карусели
-        sBox.style.display = "flex";
-        sBox.style.transition = "transform 0.5s ease-in-out";
-        sBox.style.width = "100%";
+        // Создаем картинки один раз
+        sliderBox.innerHTML = "";
+        images.forEach((src, index) => {
+            let img = document.createElement("img");
+            img.src = src;
+            img.alt = `Фото ${index + 1}`;
+            img.className = "rounded border";
+            img.style.height = "160px";
+            img.style.objectFit = "cover";
+            img.style.flexShrink = "0";
+            sliderBox.appendChild(img);
+        });
     }
 
-    function draw() {
-        if (!sBox) return;
+    function updateSlider() {
+        if (!sliderBox) return;
 
-        let vis = getCount();
-        let maxP = Math.ceil(imgs.length / vis);
+        let visible = getVisibleCount();
+        let totalPages = Math.ceil(images.length / visible);
 
-        if (idx >= maxP) idx = maxP - 1;
-        if (idx < 0) idx = 0;
+        if (currentIndex >= totalPages) currentIndex = totalPages - 1;
+        if (currentIndex < 0) currentIndex = 0;
 
-        // Создаем элементы один раз
-        if (sBox.children.length !== imgs.length) {
-            sBox.innerHTML = "";
-            imgs.forEach((src, i) => {
-                let el = document.createElement("img");
-                el.src = src;
-                el.alt = `Фото ${i + 1}`;
-                el.className = "rounded border";
-                // Строго задаем ширину каждой картинки: 100% если 1 штука, ровно 33.333% минус отступы если 3 штуки
-                el.style.flex = vis === 1 ? "0 0 100%" : "0 0 calc(33.333% - 10px)";
-                el.style.marginRight = "15px";
-                el.style.height = "160px";
-                el.style.objectFit = "cover";
-                sBox.appendChild(el);
-            });
-        } else {
-            // Обновляем размеры при изменении экрана
-            Array.from(sBox.children).forEach(el => {
-                el.style.flex = vis === 1 ? "0 0 100%" : "0 0 calc(33.333% - 10px)";
-            });
+        // Вычисляем точную ширину для каждого фото в процентах
+        let itemWidthPercent = 100 / visible;
+        let imgElements = sliderBox.children;
+
+        for (let i = 0; i < imgElements.length; i++) {
+            imgElements[i].style.width = `${itemWidthPercent}%`;
+            imgElements[i].style.flexBasis = `${itemWidthPercent}%`;
+            imgElements[i].style.boxSizing = "border-box";
+            imgElements[i].style.padding = "0 5px";
         }
 
-        // Сдвигаем ленту на нужный процент (на страницу вперед/назад)
-        let shift = idx * 100;
-        sBox.style.transform = `translateX(-${shift}%)`;
+        // Плавный сдвиг всей ленты влево
+        let shift = currentIndex * 100;
+        sliderBox.style.transform = `translateX(-${shift}%)`;
 
-        if (curP) curP.textContent = idx + 1;
-        if (totP) totP.textContent = maxP;
+        if (curPageSpan) curPageSpan.textContent = currentIndex + 1;
+        if (totPageSpan) totPageSpan.textContent = totalPages;
     }
 
-    if (pBtn && nBtn) {
-        pBtn.addEventListener("click", function () {
-            let vis = getCount();
-            let maxP = Math.ceil(imgs.length / vis);
-            idx = (idx - 1 + maxP) % maxP;
-            draw();
+    if (prevBtn && nextBtn) {
+        prevBtn.addEventListener("click", function () {
+            let visible = getVisibleCount();
+            let totalPages = Math.ceil(images.length / visible);
+            currentIndex = (currentIndex - 1 + totalPages) % totalPages;
+            updateSlider();
         });
 
-        nBtn.addEventListener("click", function () {
-            let vis = getCount();
-            let maxP = Math.ceil(imgs.length / vis);
-            idx = (idx + 1) % maxP;
-            draw();
+        nextBtn.addEventListener("click", function () {
+            let visible = getVisibleCount();
+            let totalPages = Math.ceil(images.length / visible);
+            currentIndex = (currentIndex + 1) % totalPages;
+            updateSlider();
         });
     }
 
-    window.addEventListener("resize", draw);
-    draw();
+    window.addEventListener("resize", updateSlider);
+    updateSlider();
 });
