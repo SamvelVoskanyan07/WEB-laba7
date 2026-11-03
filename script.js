@@ -1,65 +1,62 @@
-// --- ЛАБОРАТОРНАЯ РАБОТА №6: Калькулятор стоимости ---
 document.addEventListener("DOMContentLoaded", function () {
-    const typeRadios = document.querySelectorAll('input[name="productType"]');
-    const optionsContainer = document.getElementById("options-container");
-    const productSelect = document.getElementById("product-select");
-    const propertyContainer = document.getElementById("property-container");
-    const productProperty = document.getElementById("product-property");
-    const productQuantity = document.getElementById("product-quantity");
-    const calcResult = document.getElementById("calc-result");
-    const calcError = document.getElementById("calc-error");
+    let a = document.querySelectorAll('input[name="productType"]');
+    let b = document.getElementById("options-container");
+    let c = document.getElementById("product-select");
+    let d = document.getElementById("property-container");
+    let e = document.getElementById("product-property");
+    let f = document.getElementById("product-quantity");
+    let g = document.getElementById("calc-result");
+    let h = document.getElementById("calc-error");
 
-    function calculateTotal() {
-        let selectedType = document.querySelector('input[name="productType"]:checked');
-        if (!selectedType) return;
+    function calc() {
+        let sel = document.querySelector('input[name="productType"]:checked');
+        if (!sel) return;
 
-        let basePrice = parseFloat(selectedType.value);
-        let optionsPrice = 0;
-        let propertyPrice = 0;
+        let p = parseFloat(sel.value);
+        let o = 0;
+        let pr = 0;
 
-        // Показываем/скрываем опции или свойства в зависимости от типа
-        if (selectedType.id === "type2") {
-            optionsContainer.classList.remove("d-none");
-            propertyContainer.classList.add("d-none");
-            optionsPrice = parseFloat(productSelect.value);
-        } else if (selectedType.id === "type3") {
-            optionsContainer.classList.add("d-none");
-            propertyContainer.classList.remove("d-none");
-            if (productProperty.checked) {
-                propertyPrice = parseFloat(productProperty.value);
-            }
+        if (sel.id === "type2") {
+            if (b) b.classList.remove("d-none");
+            if (d) d.classList.add("d-none");
+            if (c) o = parseFloat(c.value) || 0;
+        } else if (sel.id === "type3") {
+            if (b) b.classList.add("d-none");
+            if (d) d.classList.remove("d-none");
+            if (e && e.checked) pr = parseFloat(e.value) || 0;
         } else {
-            optionsContainer.classList.add("d-none");
-            propertyContainer.classList.add("d-none");
+            if (b) b.classList.add("d-none");
+            if (d) d.classList.add("d-none");
         }
 
-        // Проверка количества (только целые положительные числа)
-        let qtyVal = productQuantity.value.trim();
-        let quantity = parseInt(qtyVal, 10);
+        let qv = f ? f.value.trim() : "1";
+        let q = parseInt(qv, 10);
 
-        if (qtyVal === "" || isNaN(quantity) || quantity <= 0 || !/^\d+$/.test(qtyVal)) {
-            calcError.style.display = "block";
-            calcError.textContent = "Пожалуйста, введите корректное целое положительное число.";
-            calcResult.textContent = "Стоимость заказа: —";
+        if (qv === "" || isNaN(q) || q <= 0 || !/^\d+$/.test(qv)) {
+            if (h) {
+                h.style.display = "block";
+                h.textContent = "Введите число";
+            }
+            if (g) g.textContent = "Стоимость заказа: —";
             return;
         } else {
-            calcError.style.display = "none";
+            if (h) h.style.display = "none";
         }
 
-        let total = (basePrice + optionsPrice + propertyPrice) * quantity;
-        calcResult.textContent = `Стоимость заказа: ${total} руб.`;
+        let res = (p + o + pr) * q;
+        if (g) g.textContent = `Стоимость заказа: ${res} руб.`;
     }
 
-    if (typeRadios.length > 0) {
-        typeRadios.forEach(radio => radio.addEventListener("change", calculateTotal));
-        if (productSelect) productSelect.addEventListener("change", calculateTotal);
-        if (productProperty) productProperty.addEventListener("change", calculateTotal);
-        if (productQuantity) productQuantity.addEventListener("input", calculateTotal);
-        calculateTotal();
+    if (a.length > 0) {
+        a.forEach(r => r.addEventListener("change", calc));
+        if (c) c.addEventListener("change", calc);
+        if (e) e.addEventListener("change", calc);
+        if (f) f.addEventListener("input", calc);
+        calc();
     }
 
-    // --- ЛАБОРАТОРНАЯ РАБОТА №7: Галерея-слайдер ---
-    const images = [
+    // Слайдер
+    let imgs = [
         "images/photo1.jpg",
         "images/photo2.jpg",
         "images/photo3.jpg",
@@ -70,62 +67,61 @@ document.addEventListener("DOMContentLoaded", function () {
         "images/photo8.jpg"
     ];
 
-    let currentIndex = 0;
+    let idx = 0;
 
-    function getVisibleCount() {
+    function getCount() {
         return window.innerWidth < 768 ? 1 : 3;
     }
 
-    const sliderContainer = document.getElementById("slider-container");
-    const prevBtn = document.getElementById("prev-btn");
-    const nextBtn = document.getElementById("next-btn");
-    const currentPageSpan = document.getElementById("current-page");
-    const totalPagesSpan = document.getElementById("total-pages");
+    let sBox = document.getElementById("slider-container");
+    let pBtn = document.getElementById("prev-btn");
+    let nBtn = document.getElementById("next-btn");
+    let curP = document.getElementById("current-page");
+    let totP = document.getElementById("total-pages");
 
-    function renderGallery() {
-        if (!sliderContainer) return;
-        
-        sliderContainer.innerHTML = "";
-        const visibleCount = getVisibleCount();
-        const totalPages = Math.ceil(images.length / visibleCount);
+    function draw() {
+        if (!sBox) return;
+        sBox.innerHTML = "";
+        let vis = getCount();
+        let maxP = Math.ceil(imgs.length / vis);
 
-        if (currentIndex >= totalPages) currentIndex = totalPages - 1;
-        if (currentIndex < 0) currentIndex = 0;
+        if (idx >= maxP) idx = maxP - 1;
+        if (idx < 0) idx = 0;
 
-        const start = currentIndex * visibleCount;
-        const end = Math.min(start + visibleCount, images.length);
+        let st = idx * vis;
+        let en = Math.min(st + vis, imgs.length);
 
-        for (let i = start; i < end; i++) {
-            const imgElement = document.createElement("img");
-            imgElement.src = images[i];
-            imgElement.alt = `Фото ${i + 1}`;
-            imgElement.className = "img-fluid rounded border";
-            imgElement.style.width = visibleCount === 1 ? "100%" : "30%";
-            imgElement.style.height = "150px";
-            imgElement.style.objectFit = "cover";
-            sliderContainer.appendChild(imgElement);
+        for (let i = st; i < en; i++) {
+            let el = document.createElement("img");
+            el.src = imgs[i];
+            el.alt = `Фото ${i + 1}`;
+            el.className = "img-fluid rounded border";
+            el.style.width = vis === 1 ? "100%" : "30%";
+            el.style.height = "150px";
+            el.style.objectFit = "cover";
+            sBox.appendChild(el);
         }
 
-        if (currentPageSpan) currentPageSpan.textContent = currentIndex + 1;
-        if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
+        if (curP) curP.textContent = idx + 1;
+        if (totP) totP.textContent = maxP;
     }
 
-    if (prevBtn && nextBtn) {
-        prevBtn.addEventListener("click", () => {
-            const visibleCount = getVisibleCount();
-            const totalPages = Math.ceil(images.length / visibleCount);
-            currentIndex = (currentIndex - 1 + totalPages) % totalPages;
-            renderGallery();
+    if (pBtn && nBtn) {
+        pBtn.addEventListener("click", function () {
+            let vis = getCount();
+            let maxP = Math.ceil(imgs.length / vis);
+            idx = (idx - 1 + maxP) % maxP;
+            draw();
         });
 
-        nextBtn.addEventListener("click", () => {
-            const visibleCount = getVisibleCount();
-            const totalPages = Math.ceil(images.length / visibleCount);
-            currentIndex = (currentIndex + 1) % totalPages;
-            renderGallery();
+        nBtn.addEventListener("click", function () {
+            let vis = getCount();
+            let maxP = Math.ceil(imgs.length / vis);
+            idx = (idx + 1) % maxP;
+            draw();
         });
     }
 
-    window.addEventListener("resize", renderGallery);
-    renderGallery();
+    window.addEventListener("resize", draw);
+    draw();
 });
