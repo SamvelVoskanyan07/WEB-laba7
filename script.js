@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         calc();
     }
 
-    // --- ЛАБОРАТОРНАЯ №7: Плавная галерея-слайдер ---
+    // --- ЛАБОРАТОРНАЯ №7: Плавная карусель (сдвиг влево) ---
     let imgs = [
         "images/photo1.jpg",
         "images/photo2.jpg",
@@ -80,7 +80,20 @@ document.addEventListener("DOMContentLoaded", function () {
     let curP = document.getElementById("current-page");
     let totP = document.getElementById("total-pages");
 
-    function draw(animate = true) {
+    if (sBox) {
+        // Настраиваем стили контейнера для красивого сдвига
+        sBox.style.display = "flex";
+        sBox.style.transition = "transform 0.5s ease-in-out";
+        sBox.style.width = "100%";
+        
+        // Оборачиваем сам контейнер в "окно", чтобы лишние картинки прятались за границами
+        if (!sBox.parentElement.style.overflow) {
+            sBox.parentElement.style.overflow = "hidden";
+            sBox.parentElement.style.position = "relative";
+        }
+    }
+
+    function draw() {
         if (!sBox) return;
         
         let vis = getCount();
@@ -89,37 +102,29 @@ document.addEventListener("DOMContentLoaded", function () {
         if (idx >= maxP) idx = maxP - 1;
         if (idx < 0) idx = 0;
 
-        let st = idx * vis;
-        let en = Math.min(st + vis, imgs.length);
-
-        // Функция отрисовки самих картинок
-        function renderContent() {
+        // Создаем картинки один раз, если их еще нет
+        if (sBox.children.length !== imgs.length) {
             sBox.innerHTML = "";
-            for (let i = st; i < en; i++) {
+            imgs.forEach((src, i) => {
                 let el = document.createElement("img");
-                el.src = imgs[i];
+                el.src = src;
                 el.alt = `Фото ${i + 1}`;
-                el.className = "img-fluid rounded border";
-                el.style.width = vis === 1 ? "100%" : "30%";
+                el.className = "img-fluid rounded border flex-shrink-0";
+                // Задаем ширину одной картинки в зависимости от режима (3 штуки или 1)
+                el.style.width = vis === 1 ? "100%" : "calc(33.333% - 10px)";
+                el.style.marginRight = "15px";
                 el.style.height = "150px";
                 el.style.objectFit = "cover";
                 sBox.appendChild(el);
-            }
-            if (curP) curP.textContent = idx + 1;
-            if (totP) totP.textContent = maxP;
+            });
         }
 
-        // Плавный эффект затухания (fade)
-        if (animate) {
-            sBox.style.transition = "opacity 0.3s ease-in-out";
-            sBox.style.opacity = "0";
-            setTimeout(() => {
-                renderContent();
-                sBox.style.opacity = "1";
-            }, 300);
-        } else {
-            renderContent();
-        }
+        // Вычисляем процент сдвига влево
+        let shiftPercentage = idx * 100;
+        sBox.style.transform = `translateX(-${shiftPercentage}%)`;
+
+        if (curP) curP.textContent = idx + 1;
+        if (totP) totP.textContent = maxP;
     }
 
     if (pBtn && nBtn) {
@@ -127,17 +132,17 @@ document.addEventListener("DOMContentLoaded", function () {
             let vis = getCount();
             let maxP = Math.ceil(imgs.length / vis);
             idx = (idx - 1 + maxP) % maxP;
-            draw(true);
+            draw();
         });
 
         nBtn.addEventListener("click", function () {
             let vis = getCount();
             let maxP = Math.ceil(imgs.length / vis);
             idx = (idx + 1) % maxP;
-            draw(true);
+            draw();
         });
     }
 
-    window.addEventListener("resize", () => draw(false));
-    draw(false);
+    window.addEventListener("resize", draw);
+    draw();
 });
