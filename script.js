@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         calculate();
     }
 
-    // --- ПЛАВНАЯ КАРУСЕЛЬ (Лабораторная №7) ---
+    // --- ИДЕАЛЬНАЯ КАРУСЕЛЬ (Лабораторная №7) ---
     const images = [
         "images/photo1.jpg",
         "images/photo2.jpg",
@@ -81,15 +81,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const totPageSpan = document.getElementById("total-pages");
 
     if (sliderBox && sliderBox.parentElement) {
-        // Жестко задаем стили для безупречной работы карусели
+        // Настройка окна видимости
         sliderBox.parentElement.style.overflow = "hidden";
         sliderBox.parentElement.style.position = "relative";
         
         sliderBox.style.display = "flex";
         sliderBox.style.transition = "transform 0.4s ease-in-out";
-        sliderBox.style.width = "100%";
 
-        // Создаем картинки один раз
+        // Генерируем картинки один раз
         sliderBox.innerHTML = "";
         images.forEach((src, index) => {
             let img = document.createElement("img");
@@ -99,6 +98,8 @@ document.addEventListener("DOMContentLoaded", function () {
             img.style.height = "160px";
             img.style.objectFit = "cover";
             img.style.flexShrink = "0";
+            img.style.padding = "0 5px";
+            img.style.boxSizing = "border-box";
             sliderBox.appendChild(img);
         });
     }
@@ -112,20 +113,19 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentIndex >= totalPages) currentIndex = totalPages - 1;
         if (currentIndex < 0) currentIndex = 0;
 
-        // Вычисляем точную ширину для каждого фото в процентах
-        let itemWidthPercent = 100 / visible;
+        // Ширина ленты зависит от количества страниц, а каждой картинки — от видимой области
+        sliderBox.style.width = `${(images.length / visible) * 100}%`;
+
         let imgElements = sliderBox.children;
+        let itemWidthPercent = 100 / images.length;
 
         for (let i = 0; i < imgElements.length; i++) {
             imgElements[i].style.width = `${itemWidthPercent}%`;
-            imgElements[i].style.flexBasis = `${itemWidthPercent}%`;
-            imgElements[i].style.boxSizing = "border-box";
-            imgElements[i].style.padding = "0 5px";
         }
 
-        // Плавный сдвиг всей ленты влево
-        let shift = currentIndex * 100;
-        sliderBox.style.transform = `translateX(-${shift}%)`;
+        // Плавный сдвиг на одну страницу
+        let shiftPercent = currentIndex * (100 / totalPages);
+        sliderBox.style.transform = `translateX(-${shiftPercent}%)`;
 
         if (curPageSpan) curPageSpan.textContent = currentIndex + 1;
         if (totPageSpan) totPageSpan.textContent = totalPages;
